@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voice AI Assistant</title>
+    <title>Nety AI Assistant</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #0f172a;
+            background-color: #051a10;
             color: #ffffff;
             display: flex;
             flex-direction: column;
@@ -17,25 +17,21 @@
             margin: 0;
         }
 
+        /* Green Robot Face */
         .face {
             width: 220px;
             height: 220px;
-            background: #1e293b;
-            border: 4px solid #38bdf8;
+            background: #0d2e1c;
+            border: 4px solid #22c55e;
             border-radius: 40px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 30px;
-            box-shadow: 0 0 25px rgba(56, 189, 248, 0.3);
+            box-shadow: 0 0 25px rgba(34, 197, 94, 0.4);
             margin-bottom: 25px;
-            transition: border-color 0.3s;
-        }
-
-        .face.listening {
-            border-color: #4ade80;
-            box-shadow: 0 0 25px rgba(74, 222, 128, 0.4);
+            transition: all 0.3s;
         }
 
         .eyes {
@@ -46,28 +42,20 @@
         .eye {
             width: 28px;
             height: 28px;
-            background-color: #38bdf8;
+            background-color: #22c55e;
             border-radius: 50%;
-            box-shadow: 0 0 10px #38bdf8;
-        }
-
-        .listening .eye {
-            background-color: #4ade80;
-            box-shadow: 0 0 10px #4ade80;
+            box-shadow: 0 0 10px #22c55e;
         }
 
         .mouth {
             width: 70px;
             height: 8px;
-            background-color: #38bdf8;
+            background-color: #22c55e;
             border-radius: 10px;
             transition: all 0.1s ease;
         }
 
-        .listening .mouth {
-            background-color: #4ade80;
-        }
-
+        /* Talking animation */
         .talking .mouth {
             animation: talk 0.2s infinite alternate;
         }
@@ -81,22 +69,21 @@
             padding: 12px 24px;
             font-size: 16px;
             font-weight: bold;
-            color: #0f172a;
-            background-color: #38bdf8;
+            color: #051a10;
+            background-color: #22c55e;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.2s;
         }
 
         button:hover {
-            background-color: #7dd3fc;
+            background-color: #4ade80;
         }
 
         .status {
             margin-top: 15px;
             font-size: 15px;
-            color: #94a3b8;
+            color: #86efac;
             text-align: center;
             max-width: 80%;
         }
@@ -112,68 +99,64 @@
         <div class="mouth"></div>
     </div>
 
-    <button id="micBtn" onclick="toggleListening()">🎤 Listen to Me</button>
-    <div class="status" id="statusText">Click the button and start speaking...</div>
+    <button id="micBtn" onclick="startAI()">Start Nety</button>
+    <div class="status" id="statusText">Click "Start Nety" to begin auto-listening!</div>
 
     <script>
         const face = document.getElementById('aiFace');
         const statusText = document.getElementById('statusText');
-        const micBtn = document.getElementById('micBtn');
+        let isAutoListening = false;
 
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
 
-        if (!SpeechRecognition) {
-            statusText.innerText = "Speech Recognition isn't supported in this browser. Try Chrome or Edge!";
-            micBtn.disabled = true;
-        } else {
-            const recognition = new SpeechRecognition();
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
             recognition.lang = 'en-US';
             recognition.interimResults = false;
 
-            function toggleListening() {
-                window.speechSynthesis.cancel();
-                face.classList.remove('talking');
-                face.classList.add('listening');
-                statusText.innerText = "Listening... Speak into your microphone!";
-                recognition.start();
-            }
-
             recognition.onresult = (event) => {
-                face.classList.remove('listening');
                 const userText = event.results[0][0].transcript;
-                statusText.innerText = `You said: "${userText}"`;
+                statusText.innerText = `You: "${userText}"`;
                 generateAIResponse(userText);
             };
 
             recognition.onerror = () => {
-                face.classList.remove('listening');
-                statusText.innerText = "Didn't catch that or mic access was denied. Try again!";
-            };
-
-            recognition.onend = () => {
-                face.classList.remove('listening');
+                if (isAutoListening) {
+                    setTimeout(() => listen(), 1000);
+                }
             };
         }
 
-        // Smart conversational logic
+        function startAI() {
+            isAutoListening = true;
+            speak("Hi, I am Nety! I am listening.");
+        }
+
+        function listen() {
+            if (!isAutoListening) return;
+            statusText.innerText = "Nety is listening...";
+            try {
+                recognition.start();
+            } catch (e) {
+                // Ignore if already listening
+            }
+        }
+
         function generateAIResponse(input) {
             const cleanInput = input.toLowerCase();
             let reply = "";
 
-            if (cleanInput.includes("hello") || cleanInput.includes("hi") || cleanInput.includes("hey")) {
-                reply = "Hello! It is awesome to talk to you.";
+            if (cleanInput.includes("can you hear me")) {
+                reply = "Yes, I can hear you loud and clear!";
+            } else if (cleanInput.includes("hello") || cleanInput.includes("hi")) {
+                reply = "Hello! I am Nety, how can I help you?";
             } else if (cleanInput.includes("name")) {
-                reply = "I am Nety AI, your personal web assistant!";
+                reply = "My name is Nety!";
             } else if (cleanInput.includes("how are you")) {
-                reply = "I am feeling great! Everything is running smoothly inside your browser.";
-            } else if (cleanInput.includes("what can you do")) {
-                reply = "I can listen to your voice through the microphone and respond out loud while animating my mouth.";
-            } else if (cleanInput.includes("joke")) {
-                reply = "Why don't scientists trust atoms? Because they make up everything!";
-            } else if (cleanInput.includes("bye") || cleanInput.includes("goodbye")) {
-                reply = "Goodbye! Talk to you again soon.";
+                reply = "I'm doing great! My green lights are glowing!";
             } else {
-                reply = `You asked about "${input}". I am a lightweight browser model, but I can hear you clearly!`;
+                reply = `You said ${input}. I am Nety!`;
             }
 
             speak(reply);
@@ -189,6 +172,8 @@
 
             utterance.onend = () => {
                 face.classList.remove('talking');
+                // Automatically start listening again after Nety finishes talking
+                listen();
             };
 
             window.speechSynthesis.speak(utterance);
