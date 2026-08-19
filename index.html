@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #121212;
+            background-color: #0f172a;
             color: #ffffff;
             display: flex;
             flex-direction: column;
@@ -17,73 +17,72 @@
             margin: 0;
         }
 
-        /* Animated Robot/AI Face */
+        /* Animated Robot Face */
         .face {
-            width: 200px;
-            height: 200px;
-            background: #1e1e1e;
-            border: 4px solid #00d2ff;
+            width: 220px;
+            height: 220px;
+            background: #1e293b;
+            border: 4px solid #38bdf8;
             border-radius: 40px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 25px;
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
-            margin-bottom: 30px;
+            gap: 30px;
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.3);
+            margin-bottom: 25px;
         }
 
         .eyes {
             display: flex;
-            gap: 40px;
+            gap: 45px;
         }
 
         .eye {
-            width: 25px;
-            height: 25px;
-            background-color: #00d2ff;
+            width: 28px;
+            height: 28px;
+            background-color: #38bdf8;
             border-radius: 50%;
-            transition: transform 0.2s;
+            box-shadow: 0 0 10px #38bdf8;
         }
 
         .mouth {
-            width: 60px;
+            width: 70px;
             height: 8px;
-            background-color: #00d2ff;
+            background-color: #38bdf8;
             border-radius: 10px;
-            transition: height 0.1s, width 0.1s;
+            transition: all 0.1s ease;
         }
 
-        /* Speaking Animation Class */
+        /* Animation when AI speaks */
         .talking .mouth {
             animation: talk 0.2s infinite alternate;
         }
 
         @keyframes talk {
-            0% { height: 6px; width: 50px; }
-            100% { height: 25px; width: 65px; border-radius: 50%; }
+            0% { height: 6px; width: 60px; }
+            100% { height: 30px; width: 75px; border-radius: 50%; }
         }
 
         button {
             padding: 12px 24px;
             font-size: 16px;
             font-weight: bold;
-            color: #fff;
-            background-color: #00d2ff;
+            color: #0f172a;
+            background-color: #38bdf8;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 210, 255, 0.3);
         }
 
-        button:active {
-            transform: scale(0.98);
+        button:hover {
+            background-color: #7dd3fc;
         }
 
         .status {
             margin-top: 15px;
-            font-size: 14px;
-            color: #888;
+            font-size: 15px;
+            color: #94a3b8;
         }
     </style>
 </head>
@@ -97,68 +96,40 @@
         <div class="mouth"></div>
     </div>
 
-    <button onclick="startListening()">🎤 Speak to AI</button>
-    <div class="status" id="statusText">Click the button and say something...</div>
+    <button onclick="talkToUser()">🎤 Speak to AI</button>
+    <div class="status" id="statusText">Click the button to make the AI talk!</div>
 
     <script>
         const face = document.getElementById('aiFace');
         const statusText = document.getElementById('statusText');
 
-        // Set up Web Speech API Recognition
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        
-        if (!SpeechRecognition) {
-            statusText.innerText = "Speech Recognition is not supported in this browser. Try Chrome or Edge.";
-        } else {
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'en-US';
+        function talkToUser() {
+            const phrases = [
+                "Hello! I am your visual AI assistant.",
+                "I am running right inside your website!",
+                "Nice to meet you! How can I help today?",
+                "My face animates whenever I speak using browser code."
+            ];
 
-            function startListening() {
-                statusText.innerText = "Listening...";
-                recognition.start();
-            }
-
-            recognition.onresult = (event) => {
-                const userSpeech = event.results[0][0].transcript;
-                statusText.innerText = `You said: "${userSpeech}"`;
-                respondToUser(userSpeech);
-            };
-
-            recognition.onerror = () => {
-                statusText.innerText = "Error recognizing speech. Try again.";
-            };
-        }
-
-        // Basic Response Rules + Text-to-Speech Output
-        function respondToUser(text) {
-            let response = "I heard you say " + text;
-            const input = text.toLowerCase();
-
-            if (input.includes("hello") || input.includes("hi")) {
-                response = "Hello there! How can I help you today?";
-            } else if (input.includes("your name")) {
-                response = "I am your custom browser AI assistant.";
-            } else if (input.includes("how are you")) {
-                response = "I am doing great, running smoothly inside your browser!";
-            }
-
+            // Pick a random line to say
+            const response = phrases[Math.floor(Math.random() * phrases.length)];
             speak(response);
         }
 
         function speak(textToSay) {
-            // Cancel ongoing speech
             window.speechSynthesis.cancel();
-
             const utterance = new SpeechSynthesisUtterance(textToSay);
-            
-            // Animate mouth when AI starts speaking
+
+            // Start mouth animation when talking
             utterance.onstart = () => {
                 face.classList.add('talking');
+                statusText.innerText = `AI Speaking: "${textToSay}"`;
             };
 
             // Stop mouth animation when finished
             utterance.onend = () => {
                 face.classList.remove('talking');
+                statusText.innerText = "Click the button to talk again!";
             };
 
             window.speechSynthesis.speak(utterance);
