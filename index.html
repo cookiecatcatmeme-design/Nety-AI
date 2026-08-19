@@ -88,16 +88,10 @@
 
     <div class="status" id="statusText">Tap anywhere to wake up Nety!</div>
 
-    <script type="module">
-        import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.14.0';
-        
-        // Disable local model check to prevent CORS errors on GitHub Pages
-        env.allowLocalModels = false;
-
+    <script>
         const face = document.getElementById('aiFace');
         const statusText = document.getElementById('statusText');
         let hasStarted = false;
-        let generator = null;
 
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition;
@@ -114,26 +108,17 @@
             };
 
             recognition.onerror = () => {
-                if (hasStarted && generator) {
+                if (hasStarted) {
                     setTimeout(() => listen(), 1000);
                 }
             };
         }
 
-        window.enableAutoListen = async function() {
+        function enableAutoListen() {
             if (hasStarted) return;
             hasStarted = true;
-            statusText.innerText = "Loading Nety's AI brain... (First time takes ~10 seconds)";
-
-            try {
-                // Using an ultra-light model specifically built for WebAssembly in pure HTML
-                generator = await pipeline('text-generation', 'Xenova/Qwen1.5-0.5B-Chat');
-                speak("Hi! I am Nety. My local brain is fully loaded!");
-            } catch (e) {
-                console.error(e);
-                statusText.innerText = "Error loading local brain. Try refreshing or use the Groq API version!";
-            }
-        };
+            speak("Hi! I am Nety. I am awake and ready to talk!");
+        }
 
         function listen() {
             if (!hasStarted) return;
@@ -146,20 +131,47 @@
         }
 
         async function generateAIResponse(input) {
-            if (!generator) return;
             statusText.innerText = "Nety is thinking...";
+            const cleanInput = input.toLowerCase();
 
+            // 1. Check local knowledge dictionary first for instant response
+            if (cleanInput.includes("cd plate") || cleanInput.includes("diplomat")) {
+                speak("CD plates stand for Corps Diplomatique. They are special license plates for foreign diplomats!");
+                return;
+            } else if (cleanInput.includes("floppy")) {
+                speak("A floppy disk stores data magnetically on a thin flexible plastic disc inside a square shell.");
+                return;
+            } else if (cleanInput.includes("cd") || cleanInput.includes("compact disc")) {
+                speak("A CD stores digital data using tiny microscopic pits read by an optical laser.");
+                return;
+            } else if (cleanInput.includes("pc") || cleanInput.includes("computer")) {
+                speak("A PC processes data using a CPU, temporary memory in RAM, and renders graphics with a GPU.");
+                return;
+            } else if (cleanInput.includes("playstation") || cleanInput.includes("xbox") || cleanInput.includes("nintendo") || cleanInput.includes("console")) {
+                speak("Gaming consoles are specialized computers designed to run video games efficiently on displays.");
+                return;
+            } else if (cleanInput.includes("hello") || cleanInput.includes("hi")) {
+                speak("Hello there! What would you like to ask me about today?");
+                return;
+            } else if (cleanInput.includes("who are you") || cleanInput.includes("name")) {
+                speak("I am Nety, your animated web assistant!");
+                return;
+            }
+
+            // 2. Fetch from a free open public AI endpoint (no key required)
             try {
-                const messages = [
-                    { role: "system", content: "You are Nety. Give very short 1-sentence answers." },
-                    { role: "user", content: input }
-                ];
+                const response = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(input)}&format=json&no_html=1&skip_disambig=1`);
+                const data = await response.json();
                 
-                const output = await generator(messages, { max_new_tokens: 30 });
-                let reply = output[0].generated_text.at(-1).content;
-                speak(reply);
-            } catch (error) {
-                speak("I had trouble generating a reply.");
+                if (data.AbstractText) {
+                    speak(data.AbstractText);
+                } else if (data.RelatedTopics && data.RelatedTopics.length > 0 && data.RelatedTopics[0].Text) {
+                    speak(data.RelatedTopics[0].Text);
+                } else {
+                    speak(`I heard you ask about ${input}. I'm still learning more details on that specific topic!`);
+                }
+            } catch (err) {
+                speak(`I heard you say ${input}, but I am having trouble fetching a live answer right now.`);
             }
         }
 
