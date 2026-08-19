@@ -1,54 +1,104 @@
-import torch
-import torch.nn as nn
-import torch.optim as optim
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browser Neural Network AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        button {
+            padding: 10px 15px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        .output {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f4f4f4;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
 
-# 1. Define the Neural Network Architecture
-class SimpleAI(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size):
-        super(SimpleAI, self).__init__()
-        # Input layer -> Hidden layer
-        self.fc1 = nn.Linear(input_size, hidden_size)
-        # Activation function (adds non-linear reasoning)
-        self.relu = nn.ReLU()
-        # Hidden layer -> Output layer
-        self.fc2 = nn.Linear(hidden_size, output_size)
+    <h2>Vanilla JS Neural Network</h2>
+    <p>This simple AI learns whether two inputs match (1,1) or (0,0) vs differ (1,0) or (0,1).</p>
+    
+    <button onclick="trainAI()">1. Train AI Model</button>
+    <button onclick="testAI(1, 1)">Test (1, 1)</button>
+    <button onclick="testAI(1, 0)">Test (1, 0)</button>
 
-    def forward(self, x):
-        x = self.fc1(x)
-        x = self.relu(x)
-        x = self.fc2(x)
-        return x
+    <div class="output" id="log">Click "Train AI Model" to begin...</div>
 
-# 2. Create sample dummy data (5 samples, 4 features each)
-# Example: 4 features like height, weight, age, score -> target class 0 or 1
-X_train = torch.randn(5, 4) 
-y_train = torch.tensor([0, 1, 0, 1, 0])
+    <script>
+        // Simple Single-Neuron AI Model
+        class SimpleNeuron {
+            constructor() {
+                // Initialize random weights and bias
+                this.weight1 = Math.random() - 0.5;
+                this.weight2 = Math.random() - 0.5;
+                this.bias = Math.random() - 0.5;
+                this.learningRate = 0.1;
+            }
 
-# 3. Instantiate the Model
-model = SimpleAI(input_size=4, hidden_size=8, output_size=2)
+            // Sigmoid Activation Function (normalizes output to 0-1 range)
+            sigmoid(x) {
+                return 1 / (1 + Math.exp(-x));
+            }
 
-# 4. Set Loss Function and Optimizer
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.01)
+            // Forward Pass: Calculate prediction
+            predict(x1, x2) {
+                let sum = (x1 * this.weight1) + (x2 * this.weight2) + this.bias;
+                return this.sigmoid(sum);
+            }
 
-# 5. Train the AI (100 training cycles/epochs)
-print("Training the AI model...")
-for epoch in range(100):
-    # Forward Pass: Make predictions
-    outputs = model(X_train)
-    loss = criterion(outputs, y_train)
+            // Train function adjusting weights based on error
+            train(x1, x2, target) {
+                let output = this.predict(x1, x2);
+                let error = target - output;
 
-    # Backward Pass: Calculate errors and adjust weights
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()
+                // Adjust weights and bias proportional to error
+                this.weight1 += error * x1 * this.learningRate;
+                this.weight2 += error * x2 * this.learningRate;
+                this.bias += error * this.learningRate;
+            }
+        }
 
-    if (epoch + 1) % 20 == 0:
-        print(f"Epoch [{epoch + 1}/100], Loss: {loss.item():.4f}")
+        const ai = new SimpleNeuron();
 
-# 6. Test the AI on a new unseen input
-test_data = torch.randn(1, 4)
-prediction = model(test_data)
-predicted_class = torch.argmax(prediction, dim=1).item()
+        function trainAI() {
+            // Training Dataset: Goal is 1 if inputs match, 0 if they don't
+            const dataset = [
+                { x1: 1, x2: 1, target: 1 },
+                { x1: 0, x2: 0, target: 1 },
+                { x1: 1, x2: 0, target: 0 },
+                { x1: 0, x2: 1, target: 0 }
+            ];
 
-print(f"\nAI Prediction for test data: Class {predicted_class}")
+            // Run training loops (epochs)
+            for (let epoch = 0; epoch < 5000; epoch++) {
+                for (let data of dataset) {
+                    ai.train(data.x1, data.x2, data.target);
+                }
+            }
+
+            document.getElementById('log').innerText = "AI successfully trained over 5,000 iterations!";
+        }
+
+        function testAI(x1, x2) {
+            let prediction = ai.predict(x1, x2);
+            let resultText = prediction > 0.5 ? "Match (1)" : "Different (0)";
+            
+            document.getElementById('log').innerText = 
+                `Inputs: (${x1}, ${x2})\nAI Output Score: ${prediction.toFixed(4)}\nClassification: ${resultText}`;
+        }
+    </script>
+</body>
+</html>
