@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nety Gearhead Assistant</title>
+    <title>Nety AI Assistant</title>
     <style>
         body {
-            font-family: 'Impact', 'Arial Black', sans-serif;
+            font-family: Arial, sans-serif;
             background-color: #051a10;
             color: #ffffff;
             display: flex;
@@ -20,7 +20,6 @@
             position: relative;
         }
 
-        /* Original Scaled-Up Facial Features */
         .face-features {
             display: flex;
             flex-direction: column;
@@ -34,7 +33,6 @@
             gap: 100px;
         }
 
-        /* Classic Circular Eyes */
         .eye {
             width: 70px;
             height: 70px;
@@ -49,7 +47,6 @@
             95% { transform: scaleY(0.1); }
         }
 
-        /* Classic Straight Mouth */
         .mouth {
             width: 180px;
             height: 20px;
@@ -59,7 +56,6 @@
             transition: all 0.1s ease;
         }
 
-        /* Talking animation */
         .talking .mouth {
             animation: talk 0.2s infinite alternate;
         }
@@ -77,8 +73,6 @@
             text-align: center;
             width: 90%;
             max-width: 800px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
         }
     </style>
 </head>
@@ -92,7 +86,7 @@
         <div class="mouth"></div>
     </div>
 
-    <div class="status" id="statusText">Tap anywhere to start Nety's engine!</div>
+    <div class="status" id="statusText">Tap anywhere to wake up Nety!</div>
 
     <script>
         const face = document.getElementById('aiFace');
@@ -123,12 +117,12 @@
         function enableAutoListen() {
             if (hasStarted) return;
             hasStarted = true;
-            speak("Vroom! Nety is tuned up and ready to hit the road! What's under the hood today?");
+            speak("Hello. I am Nety. What do you need to ask me today?");
         }
 
         function listen() {
             if (!hasStarted) return;
-            statusText.innerText = "Nety is idling... Say something!";
+            statusText.innerText = "Nety is listening...";
             try {
                 recognition.start();
             } catch (e) {
@@ -137,20 +131,14 @@
         }
 
         async function generateAIResponse(input) {
-            statusText.innerText = "Revving up the engine...";
+            statusText.innerText = "Nety is thinking...";
             const cleanInput = input.toLowerCase();
 
             if (cleanInput.includes("hello") || cleanInput.includes("hi")) {
-                speak("Vroom vroom! What's up bro? What are we building or racing today?");
+                speak("Hello. How can I help you today?");
                 return;
             } else if (cleanInput.includes("who are you") || cleanInput.includes("name")) {
-                speak("I am Nety, the ultimate gearhead AI! Born for high performance and full boost!");
-                return;
-            } else if (cleanInput.includes("fast") || cleanInput.includes("speed")) {
-                speak("Drop a gear and disappear! Life is way too short to drive boring cars!");
-                return;
-            } else if (cleanInput.includes("engine") || cleanInput.includes("turbo") || cleanInput.includes("car")) {
-                speak("Now you are talking my language! Nothing beats the sound of a spooling turbo and straight pipes!");
+                speak("I am Nety, your assistant.");
                 return;
             }
 
@@ -164,12 +152,12 @@
                 } else if (data.RelatedTopics && data.RelatedTopics.length > 0 && data.RelatedTopics[0].Text) {
                     answer = data.RelatedTopics[0].Text;
                 } else {
-                    answer = `I heard you ask about ${input}. I might need to check the garage manual for that one!`;
+                    answer = `I heard you ask about ${input}. I don't have enough details on that right now.`;
                 }
 
-                speak("Vroom! " + answer);
+                speak(answer);
             } catch (err) {
-                speak("Check engine light just came on! Had a small system error.");
+                speak("I encountered an error trying to process that.");
             }
         }
 
@@ -179,8 +167,8 @@
 
             const voices = window.speechSynthesis.getVoices();
 
-            // Finds a deep male voice profile
-            const maleVoice = voices.find(voice => 
+            // Prefers deep male voices
+            const deepMaleVoice = voices.find(voice => 
                 voice.lang.includes('en') && (
                     voice.name.includes('David') || 
                     voice.name.includes('George') || 
@@ -190,13 +178,13 @@
                 )
             );
 
-            if (maleVoice) {
-                utterance.voice = maleVoice;
+            if (deepMaleVoice) {
+                utterance.voice = deepMaleVoice;
             }
 
-            // Lower pitch and punchy speed for a deep car guy voice
-            utterance.pitch = 0.85; 
-            utterance.rate = 1.05;  
+            // Low pitch and measured rate for a calm, powerful tone
+            utterance.pitch = 0.65; 
+            utterance.rate = 0.9;  
 
             utterance.onstart = () => {
                 face.classList.add('talking');
