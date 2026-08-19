@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nety AI Assistant</title>
+    <title>Nety Cat Assistant</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Comic Sans MS', Arial, sans-serif;
             background-color: #051a10;
             color: #ffffff;
             display: flex;
@@ -20,12 +20,38 @@
             position: relative;
         }
 
+        /* Cat Face Container */
+        .cat-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Cat Ears */
+        .ears {
+            display: flex;
+            gap: 160px;
+            position: absolute;
+            top: -60px;
+        }
+
+        .ear {
+            width: 0;
+            height: 0;
+            border-left: 35px solid transparent;
+            border-right: 35px solid transparent;
+            border-bottom: 70px solid #22c55e;
+            filter: drop-shadow(0 0 15px #22c55e);
+        }
+
+        /* Scaled-Up Facial Features */
         .face-features {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 70px;
+            gap: 50px;
         }
 
         .eyes {
@@ -33,13 +59,26 @@
             gap: 100px;
         }
 
+        /* Cat Eye Slits */
         .eye {
             width: 70px;
             height: 70px;
             background-color: #22c55e;
             border-radius: 50%;
             box-shadow: 0 0 30px #22c55e;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             animation: blink 4s infinite;
+        }
+
+        .eye::after {
+            content: '';
+            width: 12px;
+            height: 50px;
+            background-color: #051a10;
+            border-radius: 10px;
         }
 
         @keyframes blink {
@@ -47,22 +86,34 @@
             95% { transform: scaleY(0.1); }
         }
 
+        /* Cat Nose & Mouth */
+        .nose {
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 20px solid #22c55e;
+            filter: drop-shadow(0 0 10px #22c55e);
+            margin-bottom: -35px;
+        }
+
         .mouth {
-            width: 180px;
-            height: 20px;
+            width: 120px;
+            height: 15px;
             background-color: #22c55e;
             border-radius: 12px;
             box-shadow: 0 0 30px #22c55e;
             transition: all 0.1s ease;
         }
 
+        /* Talking animation */
         .talking .mouth {
             animation: talk 0.2s infinite alternate;
         }
 
         @keyframes talk {
-            0% { height: 16px; width: 160px; }
-            100% { height: 75px; width: 190px; border-radius: 50%; }
+            0% { height: 12px; width: 100px; }
+            100% { height: 60px; width: 140px; border-radius: 50%; }
         }
 
         .status {
@@ -78,15 +129,22 @@
 </head>
 <body onclick="enableAutoListen()">
 
-    <div class="face-features" id="aiFace">
-        <div class="eyes">
-            <div class="eye"></div>
-            <div class="eye"></div>
+    <div class="cat-container">
+        <div class="ears">
+            <div class="ear"></div>
+            <div class="ear"></div>
         </div>
-        <div class="mouth"></div>
+        <div class="face-features" id="aiFace">
+            <div class="eyes">
+                <div class="eye"></div>
+                <div class="eye"></div>
+            </div>
+            <div class="nose"></div>
+            <div class="mouth"></div>
+        </div>
     </div>
 
-    <div class="status" id="statusText">Tap anywhere to wake up Nety!</div>
+    <div class="status" id="statusText">Tap anywhere to wake up Cat Nety!</div>
 
     <script>
         const face = document.getElementById('aiFace');
@@ -117,12 +175,12 @@
         function enableAutoListen() {
             if (hasStarted) return;
             hasStarted = true;
-            speak("Hi! I am Nety. I am awake and ready to talk!");
+            speak("Meow! I am Nety the meme cat. Ask me anything, meow!");
         }
 
         function listen() {
             if (!hasStarted) return;
-            statusText.innerText = "Nety is listening...";
+            statusText.innerText = "Nety is listening... meow!";
             try {
                 recognition.start();
             } catch (e) {
@@ -131,29 +189,17 @@
         }
 
         async function generateAIResponse(input) {
-            statusText.innerText = "Nety is thinking...";
+            statusText.innerText = "Nety is thinking... purrrr...";
             const cleanInput = input.toLowerCase();
 
-            if (cleanInput.includes("cd plate") || cleanInput.includes("diplomat")) {
-                speak("CD plates stand for Corps Diplomatique. They are special license plates for foreign diplomats!");
-                return;
-            } else if (cleanInput.includes("floppy")) {
-                speak("A floppy disk stores data magnetically on a thin flexible plastic disc inside a square shell.");
-                return;
-            } else if (cleanInput.includes("cd") || cleanInput.includes("compact disc")) {
-                speak("A CD stores digital data using tiny microscopic pits read by an optical laser.");
-                return;
-            } else if (cleanInput.includes("pc") || cleanInput.includes("computer")) {
-                speak("A PC processes data using a CPU, temporary memory in RAM, and renders graphics with a GPU.");
-                return;
-            } else if (cleanInput.includes("playstation") || cleanInput.includes("xbox") || cleanInput.includes("nintendo") || cleanInput.includes("console")) {
-                speak("Gaming consoles are specialized computers designed to run video games efficiently on displays.");
-                return;
-            } else if (cleanInput.includes("hello") || cleanInput.includes("hi")) {
-                speak("Hello there! What would you like to ask me about today?");
+            if (cleanInput.includes("hello") || cleanInput.includes("hi")) {
+                speak("Meow! Hello human! Do you have any treats for me?");
                 return;
             } else if (cleanInput.includes("who are you") || cleanInput.includes("name")) {
-                speak("I am Nety, your animated web assistant!");
+                speak("I am Cat Nety, the purr-fect internet meme assistant!");
+                return;
+            } else if (cleanInput.includes("food") || cleanInput.includes("treat")) {
+                speak("Yum! Give me fish and catnip right now!");
                 return;
             }
 
@@ -161,38 +207,28 @@
                 const response = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(input)}&format=json&no_html=1&skip_disambig=1`);
                 const data = await response.json();
                 
+                let answer = "";
                 if (data.AbstractText) {
-                    speak(data.AbstractText);
+                    answer = data.AbstractText;
                 } else if (data.RelatedTopics && data.RelatedTopics.length > 0 && data.RelatedTopics[0].Text) {
-                    speak(data.RelatedTopics[0].Text);
+                    answer = data.RelatedTopics[0].Text;
                 } else {
-                    speak(`I heard you ask about ${input}. I'm still learning more details on that specific topic!`);
+                    answer = `I heard you ask about ${input}. I need to sleep on that topic!`;
                 }
+
+                // Add cat meme flair to the reply
+                speak("Meow! " + answer + " Purrrr!");
             } catch (err) {
-                speak(`I heard you say ${input}, but I am having trouble fetching a live answer right now.`);
+                speak("Meow! My brain had a cat nap error!");
             }
         }
 
-        // Updated voice synthesis logic
         function speak(textToSay) {
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(textToSay);
 
-            const voices = window.speechSynthesis.getVoices();
-            const preferredVoice = voices.find(voice => 
-                voice.lang.includes('en') && (
-                    voice.name.includes('Google') || 
-                    voice.name.includes('Natural') || 
-                    voice.name.includes('Zira') || 
-                    voice.name.includes('Samantha')
-                )
-            );
-
-            if (preferredVoice) {
-                utterance.voice = preferredVoice;
-            }
-
-            utterance.pitch = 1.3; 
+            // Higher pitch for a cat-like meme voice
+            utterance.pitch = 1.6; 
             utterance.rate = 1.1;  
 
             utterance.onstart = () => {
@@ -205,10 +241,6 @@
             };
 
             window.speechSynthesis.speak(utterance);
-        }
-
-        if (speechSynthesis.onvoiceschanged !== undefined) {
-            speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
         }
     </script>
 </body>
