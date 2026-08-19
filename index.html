@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voice AI Face</title>
+    <title>Voice AI Assistant</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,7 +17,6 @@
             margin: 0;
         }
 
-        /* Animated Robot Face */
         .face {
             width: 220px;
             height: 220px;
@@ -31,6 +30,12 @@
             gap: 30px;
             box-shadow: 0 0 25px rgba(56, 189, 248, 0.3);
             margin-bottom: 25px;
+            transition: border-color 0.3s;
+        }
+
+        .face.listening {
+            border-color: #4ade80;
+            box-shadow: 0 0 25px rgba(74, 222, 128, 0.4);
         }
 
         .eyes {
@@ -46,6 +51,11 @@
             box-shadow: 0 0 10px #38bdf8;
         }
 
+        .listening .eye {
+            background-color: #4ade80;
+            box-shadow: 0 0 10px #4ade80;
+        }
+
         .mouth {
             width: 70px;
             height: 8px;
@@ -54,7 +64,10 @@
             transition: all 0.1s ease;
         }
 
-        /* Animation when AI speaks */
+        .listening .mouth {
+            background-color: #4ade80;
+        }
+
         .talking .mouth {
             animation: talk 0.2s infinite alternate;
         }
@@ -73,6 +86,7 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            transition: background-color 0.2s;
         }
 
         button:hover {
@@ -83,6 +97,8 @@
             margin-top: 15px;
             font-size: 15px;
             color: #94a3b8;
+            text-align: center;
+            max-width: 80%;
         }
     </style>
 </head>
@@ -96,40 +112,83 @@
         <div class="mouth"></div>
     </div>
 
-    <button onclick="talkToUser()">🎤 Speak to AI</button>
-    <div class="status" id="statusText">Click the button to make the AI talk!</div>
+    <button id="micBtn" onclick="toggleListening()">🎤 Listen to Me</button>
+    <div class="status" id="statusText">Click the button and start speaking...</div>
 
     <script>
         const face = document.getElementById('aiFace');
         const statusText = document.getElementById('statusText');
+        const micBtn = document.getElementById('micBtn');
 
-        function talkToUser() {
-            const phrases = [
-                "Hello! I am your visual AI assistant.",
-                "I am running right inside your website!",
-                "Nice to meet you! How can I help today?",
-                "My face animates whenever I speak using browser code."
-            ];
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-            // Pick a random line to say
-            const response = phrases[Math.floor(Math.random() * phrases.length)];
-            speak(response);
+        if (!SpeechRecognition) {
+            statusText.innerText = "Speech Recognition isn't supported in this browser. Try Chrome or Edge!";
+            micBtn.disabled = true;
+        } else {
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+
+            function toggleListening() {
+                window.speechSynthesis.cancel();
+                face.classList.remove('talking');
+                face.classList.add('listening');
+                statusText.innerText = "Listening... Speak into your microphone!";
+                recognition.start();
+            }
+
+            recognition.onresult = (event) => {
+                face.classList.remove('listening');
+                const userText = event.results[0][0].transcript;
+                statusText.innerText = `You said: "${userText}"`;
+                generateAIResponse(userText);
+            };
+
+            recognition.onerror = () => {
+                face.classList.remove('listening');
+                statusText.innerText = "Didn't catch that or mic access was denied. Try again!";
+            };
+
+            recognition.onend = () => {
+                face.classList.remove('listening');
+            };
+        }
+
+        // Smart conversational logic
+        function generateAIResponse(input) {
+            const cleanInput = input.toLowerCase();
+            let reply = "";
+
+            if (cleanInput.includes("hello") || cleanInput.includes("hi") || cleanInput.includes("hey")) {
+                reply = "Hello! It is awesome to talk to you.";
+            } else if (cleanInput.includes("name")) {
+                reply = "I am Nety AI, your personal web assistant!";
+            } else if (cleanInput.includes("how are you")) {
+                reply = "I am feeling great! Everything is running smoothly inside your browser.";
+            } else if (cleanInput.includes("what can you do")) {
+                reply = "I can listen to your voice through the microphone and respond out loud while animating my mouth.";
+            } else if (cleanInput.includes("joke")) {
+                reply = "Why don't scientists trust atoms? Because they make up everything!";
+            } else if (cleanInput.includes("bye") || cleanInput.includes("goodbye")) {
+                reply = "Goodbye! Talk to you again soon.";
+            } else {
+                reply = `You asked about "${input}". I am a lightweight browser model, but I can hear you clearly!`;
+            }
+
+            speak(reply);
         }
 
         function speak(textToSay) {
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(textToSay);
 
-            // Start mouth animation when talking
             utterance.onstart = () => {
                 face.classList.add('talking');
-                statusText.innerText = `AI Speaking: "${textToSay}"`;
             };
 
-            // Stop mouth animation when finished
             utterance.onend = () => {
                 face.classList.remove('talking');
-                statusText.innerText = "Click the button to talk again!";
             };
 
             window.speechSynthesis.speak(utterance);
