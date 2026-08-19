@@ -3,101 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Browser Neural Network AI</title>
+    <title>Voice AI Face</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 500px;
-            margin: 50px auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
         }
+
+        /* Animated Robot/AI Face */
+        .face {
+            width: 200px;
+            height: 200px;
+            background: #1e1e1e;
+            border: 4px solid #00d2ff;
+            border-radius: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 25px;
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
+            margin-bottom: 30px;
+        }
+
+        .eyes {
+            display: flex;
+            gap: 40px;
+        }
+
+        .eye {
+            width: 25px;
+            height: 25px;
+            background-color: #00d2ff;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+
+        .mouth {
+            width: 60px;
+            height: 8px;
+            background-color: #00d2ff;
+            border-radius: 10px;
+            transition: height 0.1s, width 0.1s;
+        }
+
+        /* Speaking Animation Class */
+        .talking .mouth {
+            animation: talk 0.2s infinite alternate;
+        }
+
+        @keyframes talk {
+            0% { height: 6px; width: 50px; }
+            100% { height: 25px; width: 65px; border-radius: 50%; }
+        }
+
         button {
-            padding: 10px 15px;
-            margin-right: 10px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #00d2ff;
+            border: none;
+            border-radius: 8px;
             cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 210, 255, 0.3);
         }
-        .output {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #f4f4f4;
-            border-left: 4px solid #007bff;
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .status {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #888;
         }
     </style>
 </head>
 <body>
 
-    <h2>Vanilla JS Neural Network</h2>
-    <p>This simple AI learns whether two inputs match (1,1) or (0,0) vs differ (1,0) or (0,1).</p>
-    
-    <button onclick="trainAI()">1. Train AI Model</button>
-    <button onclick="testAI(1, 1)">Test (1, 1)</button>
-    <button onclick="testAI(1, 0)">Test (1, 0)</button>
+    <div class="face" id="aiFace">
+        <div class="eyes">
+            <div class="eye"></div>
+            <div class="eye"></div>
+        </div>
+        <div class="mouth"></div>
+    </div>
 
-    <div class="output" id="log">Click "Train AI Model" to begin...</div>
+    <button onclick="startListening()">🎤 Speak to AI</button>
+    <div class="status" id="statusText">Click the button and say something...</div>
 
     <script>
-        // Simple Single-Neuron AI Model
-        class SimpleNeuron {
-            constructor() {
-                // Initialize random weights and bias
-                this.weight1 = Math.random() - 0.5;
-                this.weight2 = Math.random() - 0.5;
-                this.bias = Math.random() - 0.5;
-                this.learningRate = 0.1;
+        const face = document.getElementById('aiFace');
+        const statusText = document.getElementById('statusText');
+
+        // Set up Web Speech API Recognition
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        
+        if (!SpeechRecognition) {
+            statusText.innerText = "Speech Recognition is not supported in this browser. Try Chrome or Edge.";
+        } else {
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+
+            function startListening() {
+                statusText.innerText = "Listening...";
+                recognition.start();
             }
 
-            // Sigmoid Activation Function (normalizes output to 0-1 range)
-            sigmoid(x) {
-                return 1 / (1 + Math.exp(-x));
-            }
+            recognition.onresult = (event) => {
+                const userSpeech = event.results[0][0].transcript;
+                statusText.innerText = `You said: "${userSpeech}"`;
+                respondToUser(userSpeech);
+            };
 
-            // Forward Pass: Calculate prediction
-            predict(x1, x2) {
-                let sum = (x1 * this.weight1) + (x2 * this.weight2) + this.bias;
-                return this.sigmoid(sum);
-            }
-
-            // Train function adjusting weights based on error
-            train(x1, x2, target) {
-                let output = this.predict(x1, x2);
-                let error = target - output;
-
-                // Adjust weights and bias proportional to error
-                this.weight1 += error * x1 * this.learningRate;
-                this.weight2 += error * x2 * this.learningRate;
-                this.bias += error * this.learningRate;
-            }
+            recognition.onerror = () => {
+                statusText.innerText = "Error recognizing speech. Try again.";
+            };
         }
 
-        const ai = new SimpleNeuron();
+        // Basic Response Rules + Text-to-Speech Output
+        function respondToUser(text) {
+            let response = "I heard you say " + text;
+            const input = text.toLowerCase();
 
-        function trainAI() {
-            // Training Dataset: Goal is 1 if inputs match, 0 if they don't
-            const dataset = [
-                { x1: 1, x2: 1, target: 1 },
-                { x1: 0, x2: 0, target: 1 },
-                { x1: 1, x2: 0, target: 0 },
-                { x1: 0, x2: 1, target: 0 }
-            ];
-
-            // Run training loops (epochs)
-            for (let epoch = 0; epoch < 5000; epoch++) {
-                for (let data of dataset) {
-                    ai.train(data.x1, data.x2, data.target);
-                }
+            if (input.includes("hello") || input.includes("hi")) {
+                response = "Hello there! How can I help you today?";
+            } else if (input.includes("your name")) {
+                response = "I am your custom browser AI assistant.";
+            } else if (input.includes("how are you")) {
+                response = "I am doing great, running smoothly inside your browser!";
             }
 
-            document.getElementById('log').innerText = "AI successfully trained over 5,000 iterations!";
+            speak(response);
         }
 
-        function testAI(x1, x2) {
-            let prediction = ai.predict(x1, x2);
-            let resultText = prediction > 0.5 ? "Match (1)" : "Different (0)";
+        function speak(textToSay) {
+            // Cancel ongoing speech
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(textToSay);
             
-            document.getElementById('log').innerText = 
-                `Inputs: (${x1}, ${x2})\nAI Output Score: ${prediction.toFixed(4)}\nClassification: ${resultText}`;
+            // Animate mouth when AI starts speaking
+            utterance.onstart = () => {
+                face.classList.add('talking');
+            };
+
+            // Stop mouth animation when finished
+            utterance.onend = () => {
+                face.classList.remove('talking');
+            };
+
+            window.speechSynthesis.speak(utterance);
         }
     </script>
 </body>
