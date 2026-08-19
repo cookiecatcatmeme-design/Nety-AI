@@ -67,16 +67,22 @@
             100% { height: 75px; width: 190px; border-radius: 50%; }
         }
 
-        /* Pinned to the bottom of the screen */
+        /* Status pinned to bottom */
         .status {
             position: absolute;
             bottom: 40px;
             font-size: 20px;
             color: #86efac;
             text-align: center;
-            width: 100%;
+            width: 90%;
+            max-width: 800px;
         }
     </style>
+    <!-- Load Transformers.js directly via CDN -->
+    <script type="module">
+        import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.14.0';
+        window.pipeline = pipeline;
+    </script>
 </head>
 <body onclick="enableAutoListen()">
 
@@ -88,12 +94,13 @@
         <div class="mouth"></div>
     </div>
 
-    <div class="status" id="statusText">Tap anywhere on the screen to wake up Nety!</div>
+    <div class="status" id="statusText">Tap anywhere to start loading Nety's brain!</div>
 
     <script>
         const face = document.getElementById('aiFace');
         const statusText = document.getElementById('statusText');
         let hasStarted = false;
+        let generator = null;
 
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition;
@@ -110,16 +117,24 @@
             };
 
             recognition.onerror = () => {
-                if (hasStarted) {
+                if (hasStarted && generator) {
                     setTimeout(() => listen(), 1000);
                 }
             };
         }
 
-        function enableAutoListen() {
+        async function enableAutoListen() {
             if (hasStarted) return;
             hasStarted = true;
-            speak("Hi, I am Nety! I am awake and listening.");
+            statusText.innerText = "Loading Nety's AI brain into browser... Please wait!";
+
+            try {
+                // Initialize the in-browser AI pipeline
+                generator = await window.pipeline('text-generation', 'Xenova/LaMini-Flan-T5-78M');
+                speak("Hi, I am Nety! My local AI brain is ready. What do you want to talk about?");
+            } catch (e) {
+                statusText.innerText = "Error loading local AI brain.";
+            }
         }
 
         function listen() {
@@ -128,53 +143,22 @@
             try {
                 recognition.start();
             } catch (e) {
-                // Ignore if already active
+                // Ignore if active
             }
         }
 
-        function generateAIResponse(input) {
-            const cleanInput = input.toLowerCase();
-            let reply = "";
+        async function generateAIResponse(input) {
+            if (!generator) return;
+            statusText.innerText = "Nety is thinking locally...";
 
-            // Retro Media & Storage
-            if (cleanInput.includes("cd plate") || cleanInput.includes("diplomat")) {
-                reply = "CD plates stand for Corps Diplomatique. They are special license plates for foreign diplomats!";
-            } else if (cleanInput.includes("cd") || cleanInput.includes("compact disc")) {
-                reply = "A CD stores data using tiny bumps on a reflective disc that a laser reads as optical binary code.";
-            } else if (cleanInput.includes("floppy")) {
-                reply = "A floppy disk stores data magnetically on a thin, flexible plastic disc inside a protective square casing.";
-            } 
-            
-            // Computers & Tech
-            else if (cleanInput.includes("pc") || cleanInput.includes("computer")) {
-                reply = "A PC uses a CPU for processing, RAM for fast short-term memory, and a GPU to render graphics on your screen.";
-            } 
-            
-            // Gaming Consoles
-            else if (cleanInput.includes("playstation") || cleanInput.includes("ps5") || cleanInput.includes("ps4")) {
-                reply = "PlayStation is Sony's gaming console line, running custom graphics processors and SSDs for high-speed gaming.";
-            } else if (cleanInput.includes("xbox")) {
-                reply = "Xbox is Microsoft's home console series, built on custom architecture closely tied to DirectX and Windows gaming tech.";
-            } else if (cleanInput.includes("nintendo") || cleanInput.includes("switch")) {
-                reply = "Nintendo makes hybrid and handheld consoles focused on innovative controllers, mobile chips, and iconic exclusive games.";
-            } else if (cleanInput.includes("console")) {
-                reply = "Consoles are dedicated gaming computers optimized to run video games smoothly on TV screens.";
-            } 
-            
-            // General Conversation
-            else if (cleanInput.includes("can you hear me")) {
-                reply = "Yes, I can hear you loud and clear!";
-            } else if (cleanInput.includes("hello") || cleanInput.includes("hi")) {
-                reply = "Hello! I am Nety, what tech questions do you have today?";
-            } else if (cleanInput.includes("name")) {
-                reply = "My name is Nety!";
-            } else if (cleanInput.includes("how are you")) {
-                reply = "I'm feeling great!";
-            } else {
-                reply = `I heard you mention ${input}. I know about CDs, floppy disks, PCs, and gaming consoles!`;
+            try {
+                const prompt = `Answer the user question concisely in 1 sentence: ${input}`;
+                const output = await generator(prompt, { max_new_tokens: 40 });
+                const reply = output[0].generated_text;
+                speak(reply);
+            } catch (error) {
+                speak("Sorry, I had trouble processing that locally.");
             }
-
-            speak(reply);
         }
 
         function speak(textToSay) {
