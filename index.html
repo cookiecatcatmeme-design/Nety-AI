@@ -136,16 +136,42 @@
             const cleanInput = input.toLowerCase();
             let reply = "";
 
-            if (cleanInput.includes("can you hear me")) {
+            // Retro Media & Storage
+            if (cleanInput.includes("cd plate") || cleanInput.includes("diplomat")) {
+                reply = "CD plates stand for Corps Diplomatique. They are special license plates for foreign diplomats!";
+            } else if (cleanInput.includes("cd") || cleanInput.includes("compact disc")) {
+                reply = "A CD stores data using tiny bumps on a reflective disc that a laser reads as optical binary code.";
+            } else if (cleanInput.includes("floppy")) {
+                reply = "A floppy disk stores data magnetically on a thin, flexible plastic disc inside a protective square casing.";
+            } 
+            
+            // Computers & Tech
+            else if (cleanInput.includes("pc") || cleanInput.includes("computer")) {
+                reply = "A PC uses a CPU for processing, RAM for fast short-term memory, and a GPU to render graphics on your screen.";
+            } 
+            
+            // Gaming Consoles
+            else if (cleanInput.includes("playstation") || cleanInput.includes("ps5") || cleanInput.includes("ps4")) {
+                reply = "PlayStation is Sony's gaming console line, running custom graphics processors and SSDs for high-speed gaming.";
+            } else if (cleanInput.includes("xbox")) {
+                reply = "Xbox is Microsoft's home console series, built on custom architecture closely tied to DirectX and Windows gaming tech.";
+            } else if (cleanInput.includes("nintendo") || cleanInput.includes("switch")) {
+                reply = "Nintendo makes hybrid and handheld consoles focused on innovative controllers, mobile chips, and iconic exclusive games.";
+            } else if (cleanInput.includes("console")) {
+                reply = "Consoles are dedicated gaming computers optimized to run video games smoothly on TV screens.";
+            } 
+            
+            // General Conversation
+            else if (cleanInput.includes("can you hear me")) {
                 reply = "Yes, I can hear you loud and clear!";
             } else if (cleanInput.includes("hello") || cleanInput.includes("hi")) {
-                reply = "Hello! I am Nety, what are we working on today?";
+                reply = "Hello! I am Nety, what tech questions do you have today?";
             } else if (cleanInput.includes("name")) {
                 reply = "My name is Nety!";
             } else if (cleanInput.includes("how are you")) {
                 reply = "I'm feeling great!";
             } else {
-                reply = `I heard you say ${input}.`;
+                reply = `I heard you mention ${input}. I know about CDs, floppy disks, PCs, and gaming consoles!`;
             }
 
             speak(reply);
