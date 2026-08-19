@@ -20,7 +20,6 @@
             position: relative;
         }
 
-        /* Scaled-Up Facial Features */
         .face-features {
             display: flex;
             flex-direction: column;
@@ -57,7 +56,6 @@
             transition: all 0.1s ease;
         }
 
-        /* Talking animation */
         .talking .mouth {
             animation: talk 0.2s infinite alternate;
         }
@@ -67,7 +65,6 @@
             100% { height: 75px; width: 190px; border-radius: 50%; }
         }
 
-        /* Status pinned to bottom */
         .status {
             position: absolute;
             bottom: 40px;
@@ -78,11 +75,6 @@
             max-width: 800px;
         }
     </style>
-    <!-- Load Transformers.js directly via CDN -->
-    <script type="module">
-        import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.14.0';
-        window.pipeline = pipeline;
-    </script>
 </head>
 <body onclick="enableAutoListen()">
 
@@ -94,9 +86,14 @@
         <div class="mouth"></div>
     </div>
 
-    <div class="status" id="statusText">Tap anywhere to start loading Nety's brain!</div>
+    <div class="status" id="statusText">Tap anywhere to wake up Nety!</div>
 
-    <script>
+    <script type="module">
+        import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.14.0';
+        
+        // Disable local model check to prevent CORS errors on GitHub Pages
+        env.allowLocalModels = false;
+
         const face = document.getElementById('aiFace');
         const statusText = document.getElementById('statusText');
         let hasStarted = false;
@@ -123,19 +120,20 @@
             };
         }
 
-        async function enableAutoListen() {
+        window.enableAutoListen = async function() {
             if (hasStarted) return;
             hasStarted = true;
-            statusText.innerText = "Loading Nety's AI brain into browser... Please wait!";
+            statusText.innerText = "Loading Nety's AI brain... (First time takes ~10 seconds)";
 
             try {
-                // Initialize the in-browser AI pipeline
-                generator = await window.pipeline('text-generation', 'Xenova/LaMini-Flan-T5-78M');
-                speak("Hi, I am Nety! My local AI brain is ready. What do you want to talk about?");
+                // Using an ultra-light model specifically built for WebAssembly in pure HTML
+                generator = await pipeline('text-generation', 'Xenova/Qwen1.5-0.5B-Chat');
+                speak("Hi! I am Nety. My local brain is fully loaded!");
             } catch (e) {
-                statusText.innerText = "Error loading local AI brain.";
+                console.error(e);
+                statusText.innerText = "Error loading local brain. Try refreshing or use the Groq API version!";
             }
-        }
+        };
 
         function listen() {
             if (!hasStarted) return;
@@ -149,15 +147,19 @@
 
         async function generateAIResponse(input) {
             if (!generator) return;
-            statusText.innerText = "Nety is thinking locally...";
+            statusText.innerText = "Nety is thinking...";
 
             try {
-                const prompt = `Answer the user question concisely in 1 sentence: ${input}`;
-                const output = await generator(prompt, { max_new_tokens: 40 });
-                const reply = output[0].generated_text;
+                const messages = [
+                    { role: "system", content: "You are Nety. Give very short 1-sentence answers." },
+                    { role: "user", content: input }
+                ];
+                
+                const output = await generator(messages, { max_new_tokens: 30 });
+                let reply = output[0].generated_text.at(-1).content;
                 speak(reply);
             } catch (error) {
-                speak("Sorry, I had trouble processing that locally.");
+                speak("I had trouble generating a reply.");
             }
         }
 
