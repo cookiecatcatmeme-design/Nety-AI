@@ -20,63 +20,59 @@
             position: relative;
         }
 
-        /* Scaled-Up Car Front Features */
+        /* Original Scaled-Up Facial Features */
         .face-features {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 50px;
+            gap: 70px;
         }
 
-        /* Aggressive Headlight Eyes */
         .eyes {
             display: flex;
-            gap: 120px;
+            gap: 100px;
         }
 
+        /* Classic Circular Eyes */
         .eye {
-            width: 90px;
-            height: 45px;
+            width: 70px;
+            height: 70px;
             background-color: #22c55e;
-            box-shadow: 0 0 35px #22c55e;
-            /* Slanted LED Headlight look */
-            clip-path: polygon(0% 0%, 100% 35%, 85% 100%, 15% 100%);
-            animation: pulse-lights 3s infinite alternate;
+            border-radius: 50%;
+            box-shadow: 0 0 30px #22c55e;
+            animation: blink 4s infinite;
         }
 
-        @keyframes pulse-lights {
-            0% { box-shadow: 0 0 20px #22c55e; }
-            100% { box-shadow: 0 0 45px #22c55e; }
+        @keyframes blink {
+            0%, 90%, 100% { transform: scaleY(1); }
+            95% { transform: scaleY(0.1); }
         }
 
-        /* Front Grille / Bumper Mouth */
+        /* Classic Straight Mouth */
         .mouth {
-            width: 220px;
-            height: 25px;
+            width: 180px;
+            height: 20px;
             background-color: #22c55e;
-            border-radius: 6px;
+            border-radius: 12px;
             box-shadow: 0 0 30px #22c55e;
             transition: all 0.1s ease;
-            position: relative;
-            /* Grille Lines */
-            background-image: repeating-linear-gradient(90deg, #051a10 0, #051a10 8px, #22c55e 8px, #22c55e 14px);
         }
 
-        /* Engine Revving / Talking animation */
+        /* Talking animation */
         .talking .mouth {
-            animation: talk 0.15s infinite alternate;
+            animation: talk 0.2s infinite alternate;
         }
 
         @keyframes talk {
-            0% { height: 20px; width: 200px; }
-            100% { height: 70px; width: 230px; border-radius: 20px; }
+            0% { height: 16px; width: 160px; }
+            100% { height: 75px; width: 190px; border-radius: 50%; }
         }
 
         .status {
             position: absolute;
             bottom: 40px;
-            font-size: 22px;
+            font-size: 20px;
             color: #86efac;
             text-align: center;
             width: 90%;
@@ -144,7 +140,6 @@
             statusText.innerText = "Revving up the engine...";
             const cleanInput = input.toLowerCase();
 
-            // Custom Gearhead Responses
             if (cleanInput.includes("hello") || cleanInput.includes("hi")) {
                 speak("Vroom vroom! What's up bro? What are we building or racing today?");
                 return;
@@ -172,7 +167,6 @@
                     answer = `I heard you ask about ${input}. I might need to check the garage manual for that one!`;
                 }
 
-                // Add gearhead flair
                 speak("Vroom! " + answer);
             } catch (err) {
                 speak("Check engine light just came on! Had a small system error.");
@@ -185,7 +179,7 @@
 
             const voices = window.speechSynthesis.getVoices();
 
-            // Look specifically for deep male voices
+            // Finds a deep male voice profile
             const maleVoice = voices.find(voice => 
                 voice.lang.includes('en') && (
                     voice.name.includes('David') || 
@@ -200,7 +194,7 @@
                 utterance.voice = maleVoice;
             }
 
-            // Lower pitch and punchier speed for a deep car guy voice
+            // Lower pitch and punchy speed for a deep car guy voice
             utterance.pitch = 0.85; 
             utterance.rate = 1.05;  
 
@@ -214,6 +208,10 @@
             };
 
             window.speechSynthesis.speak(utterance);
+        }
+
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
         }
     </script>
 </body>
